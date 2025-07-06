@@ -1,0 +1,325 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:a4j="http://richfaces.org/a4j"
+	xmlns:pdgl="http://prodemge.gov.br/taglib"
+	xmlns:pdg="http://java.sun.com/jsf/composite/pdgcomp"
+	xmlns:grp="http://java.sun.com/jsf/composite/comp"
+	template="/templates/page.xhtml" xmlns:o="http://omnifaces.org/ui"
+	xmlns:pdgcore="http://java.sun.com/jsf/composite/pdgcore"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:r="http://richfaces.org/rich">
+
+	<f:metadata>
+		<f:viewParam name="edit" rendered="#{userSession.editAllowed}"
+			value="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.edit}" />
+		<f:viewParam name="objectId"
+			value="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.objectId}" />
+	</f:metadata>
+
+	<ui:param name="pageTitle" value="Permissão para Programação Global" />
+	<ui:param name="codigoRecurso" value="GRPPO96277" />
+	
+	<ui:define name="page">
+		<style type="text/css">
+			*.colPeriodo {
+				margin-left: 375px;
+			}
+			
+			*.rowUnidade {
+				margin-left: 350px;
+			}
+			
+			.cabecalhoPersonalizadaPeriodo {
+				width: 100%;
+				border-bottom: 1px solid;
+				text-align: center;
+				min-width: 180px !important;
+				max-width: 180px !important;
+			}
+			
+			.cabecalhoPersonalizadaPeriodoInicio {
+				width: 50%;
+				float: left;
+				padding: 10px;
+				min-width: 90px !important;
+				max-width: 400px !important;
+			}
+			
+			.cabecalhoPersonalizadaPeriodoFim {
+				width: 50%;
+				float: left;
+				border-left: 1px solid;
+				padding: 10px;
+				min-width: 90px !important;
+				max-width: 400px !important;
+			}
+			
+			.th.cabecalhoPersonalizadaPeriodo {
+				padding: 0px !important;
+			}
+			
+			
+			</style>
+
+		<h:panelGroup id="panelGeral">
+			<h:panelGroup id="panelPesquisa">
+				<div style="padding-top: 25px; border: 0px; width: 100%; float: left; overflow-x: auto;"
+					class="boxView panel panel-primary">
+					
+					<div class="panel-body">
+						<pdg:formPanel id="formPesquisaAutorizacao">
+							<h:panelGroup id="panelExercicio">
+								<pdg:row>
+									<pdg:col size="3">
+										<h:panelGroup>
+											<pdg:label value="Exercício Financeiro" labelRequired="true"
+												align="right" />
+										</h:panelGroup>
+									</pdg:col>
+									<pdg:col size="2">
+										<pdg:selectListField id="exercicioFinanceiro" 
+											disabled="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.ehAnoUnico}"
+											itemValues="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.listaExercicioFinanceiro}"
+											value="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.exercicioFinanceiroSelecionado}"
+											showBlankItem="false" type="primitiveList">
+										</pdg:selectListField>
+									</pdg:col>
+								</pdg:row>
+							</h:panelGroup>
+						
+							<h:panelGroup id="panelOpcoes">
+								<pdg:row>
+									<pdg:col size="3">
+										<h:panelGroup>
+											<pdg:label value="Permite Programação Sem Element-Item"
+												align="right" />
+										</h:panelGroup>
+									</pdg:col>								
+							
+									<pdg:col size="4">
+										<pdg:selectRadioField 
+											id="filtroSimNao"
+											value="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.filtroSimNao}"
+											itemValues="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.getListaSimNao()}"
+											itemLabelField="descricao" />
+									</pdg:col>
+								</pdg:row>
+							</h:panelGroup>						
+						
+							<h:panelGroup id="panelUnidades">
+								<pdg:row>
+									<pdg:col size="3">
+										<h:panelGroup>
+											<pdg:label value="Unidade Orçamentária" labelRequired="true"
+												style="padding: 13px 0px;" />
+										</h:panelGroup>
+									</pdg:col>
+
+									<h:panelGrid columns="4" id="colUO">
+										<pdg:textField
+											value="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.unidadesOrcamentaria}"
+											size="56" id="autoCompleteUO" style="margin-left: 10px;" />
+										<pdg:formButton value="detalhes" text="false" execute="@form"
+											imgIcon="search" type="primary" limitRender="true"
+											onclick="#{r:component('searchUO')}.show();" />
+										<a4j:commandLink styleClass="pdg_button_column"
+											execute="autoCompleteUO" render="rowPanelListaUO autoCompleteUO"
+											action="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.adicionarUOSelNaLista()}">
+											<h:graphicImage value="/images/icons/add.png"
+												title="Adicionar UO para lista de pesquisa" />
+										</a4j:commandLink>
+									</h:panelGrid>
+								</pdg:row>												
+								<pdg:col>
+									<h:outputText
+										value="Informe os códigos das UO separados por vírgula (,) e clique em +"
+										style="padding-left: 24.3%; color: gray;" />
+								</pdg:col>
+								<br />
+								<br />
+								<pdg:row id="rowPanelListaUO">
+									<h:panelGroup id="panelListaUOs">
+										<pdg:col size="3" />
+										<pdg:col size="5">
+											<pdgl:dataList backingBean="#{parametrizacaoProgramacaoOrcamentariaGlobalBean}"
+												dataTableId="dataListUOs" showIndex="true"
+												pageSizeControl="true"
+												list="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.unidadesSelecionadas}" rows="5"
+												renderIfEmpty="false">
+												<pdgl:column label="#{messages['codigo']}" field="codigo"
+													align="center" />
+												<pdgl:column label="#{messages['nome']}" field="nome"
+													align="center" />
+					
+												<r:column style="text-align:center">
+													<f:facet name="header">Ação</f:facet>
+													<a4j:commandLink execute="@this" render="panelListaUOs"
+														styleClass="pdg_button_column"
+														action="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.removerUOParaPesquisa(entity)}">
+														<h:graphicImage value="/images/icons/del.png"
+															title="Remover UO" />
+													</a4j:commandLink>
+												</r:column>
+											</pdgl:dataList>
+										</pdg:col>
+									</h:panelGroup>
+								</pdg:row>							
+							</h:panelGroup>
+
+							<h:panelGroup class="tx_right" layout="block">
+								<a4j:commandLink execute="@this">
+									<pdg:formButton id="btnPesquisar"
+										value="#{messages['pesquisar']}"									
+										action="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.search()}"
+										execute="formPesquisaAutorizacao formPeriodo"
+										render="formPesquisaAutorizacao formPeriodo formResultadoPesquisa tabelaResultadoPesquisa panelUnidades"
+										margin="left" imgIcon="search" />
+								 </a4j:commandLink>
+								<pdg:formButton id="btnLimpar" value="#{messages['limpar']}"
+									action="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.limparFormPesquisa()}"
+									execute="formPesquisaAutorizacao formPeriodo formResultadoPesquisa"
+									render="formPesquisaAutorizacao formPeriodo formResultadoPesquisa panelListaUOs panelUnidades"
+									margin="left" imgIcon="erase" />
+							</h:panelGroup>
+						</pdg:formPanel>
+					</div>
+				</div>
+
+				<div style="padding-top: 25px; border: 0px; width: 100%; float: left; overflow-x: auto;"
+					class="boxView panel panel-primary">
+					<div class="panel-heading">
+						<h:outputText value="Autorizações" />
+					</div>
+					<div class="panel-body">
+						<pdg:formPanel id="formResultadoPesquisa">
+							<pdgl:tabularList id="tabelaResultadoPesquisa"
+								backingBean="#{parametrizacaoProgramacaoOrcamentariaGlobalBean}"
+								list="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.listaProgramacaoGlobal}"
+								renderIfEmpty="true" showIndex="true" pageSizeControl="true"
+								rows="5" edit="false" showNewButton="false">
+
+								<pdgl:column label="Unidade Orçamentária"
+									field="codigoNome" 
+									align="center" />
+									
+								<r:column style="text-align: center; width: 200px">
+									<f:facet name="header"><h:outputText value="Permite Programação Sem Elemento-Item"/></f:facet>
+									
+									<h:selectBooleanCheckbox 
+										value="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.listaProgramacaoGlobal[it.index].boolPermiteProgSemElementoItem}">
+										<a4j:ajax event="change" execute="@this" render="@this"></a4j:ajax> 										
+									</h:selectBooleanCheckbox>									
+								</r:column>
+
+								<r:column style="text-align: center;">
+									<f:facet name="header">Ações</f:facet>
+									<a4j:commandLink title="Detalhes"
+										action="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.carregarHistorico(
+											parametrizacaoProgramacaoOrcamentariaGlobalBean.listaProgramacaoGlobal[it.index])}"
+										oncomplete="#{r:component('popupHistoricoParametrizacao')}.show(); return false;"
+										styleClass="pdg_button_column" execute="@this"
+										render="popupHistorico">
+										<h:graphicImage value="/images/icons/list.png" alt="Detalhes" />
+									</a4j:commandLink>								
+								</r:column>
+							</pdgl:tabularList>
+							
+							<pdg:popupPanel header="Histórico" id="popupHistorico"
+								popupId="popupHistoricoParametrizacao" height="600" width="1100"
+								showControls="true">
+
+								<r:messages id="mensagens_popup" for="messages"
+									globalOnly="true" />
+
+							<div class="panel-heading" style="font-size: 20px">
+								<h:outputText value="Unidade Orçamentária : #{parametrizacaoProgramacaoOrcamentariaGlobalBean.unidadeHistorico.codigoNome}" />
+							</div>
+								<pdgl:tabularList
+									backingBean="#{parametrizacaoProgramacaoOrcamentariaGlobalBean}"
+									list="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.listaHistorico}"
+									renderIfEmpty="true" showIndex="false" pageSizeControl="true"
+									rows="3" edit="false" showNewButton="false">
+									
+									<r:column style="width: 130px;">
+										<center>
+											<f:facet name="header">
+												<h:outputLabel value="Permite Programação em Nível Global" />
+											</f:facet>
+											<h:outputText value="#{entity.programacaoSemElementoItem == 'S' ? 'SIM' : 'NÃO'} " />
+										</center>
+									</r:column>
+																			
+									<r:column style="width: 200px;">
+										<center>
+											<f:facet name="header">
+												<h:outputLabel value="Usuário" />
+											</f:facet>
+											<h:outputText value="#{entity.pessoa.nome} " />
+										</center>
+									</r:column>										
+
+									<r:column style="width: 130px;">
+										<center>
+											<f:facet name="header">
+												<h:outputLabel value="Data-Hora do Registro" />
+											</f:facet>
+											<h:outputText value="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.getFormatedDate(entity.dataRegistro)} ">
+											</h:outputText>
+										</center>
+									</r:column>
+								</pdgl:tabularList>
+
+								<pdg:row>
+									<pdg:col size="10" />
+									<pdg:col size="1">
+										<pdg:formButton value="Fechar" execute="@this" margin="both"
+											imgIcon="check" icon="true"
+											onclick="#{r:component('popupHistoricoParametrizacao')}.hide(); return false;" />
+									</pdg:col>
+								</pdg:row>
+							</pdg:popupPanel>
+						</pdg:formPanel>
+					</div>
+				</div>
+
+				<h:panelGroup class="tx_right" layout="block">
+					<pdg:formButton id="btnConcluir" 
+						value="#{messages['concluir']}"
+						execute="panelPesquisa panel-body"
+						onclick="inclusaoParametro(#{it.index});" 
+					/>
+				</h:panelGroup>							
+			</h:panelGroup>
+		</h:panelGroup>
+		
+		<!-- Popups fora do form -->
+		<h:panelGroup>
+			<grp:popupSelectManyUO popupId="searchUO"
+				targetBean="#{parametrizacaoProgramacaoOrcamentariaGlobalBean}"
+				targetMethodName="setListUO" render="rowPanelListaUO"/>
+		</h:panelGroup>		
+		
+		<h:panelGroup>
+			<pdg:alert popupId="alertInclusaoParametro" title="Salvar"
+				message="Confirma a gravação?">
+				<pdg:formButton value="Confirmar"
+					execute="formResultadoPesquisa"
+					oncomplete="#{r:component('alertInclusaoParametro')}.hide(); return false;"
+					action="#{parametrizacaoProgramacaoOrcamentariaGlobalBean.concluirInclusao()}"
+					margin="right" />
+				<pdg:formButton value="Cancelar"
+					onclick="#{r:component('alertInclusaoParametro')}.hide(); return false;"
+					margin="right" />
+			</pdg:alert>
+
+			<a4j:jsFunction name="inclusaoParametro"
+				execute="formResultadoPesquisa" 
+				render="formResultadoPesquisa"
+				oncomplete="#{r:component('alertInclusaoParametro')}.show(); return false;">
+			</a4j:jsFunction>
+		</h:panelGroup>		
+	</ui:define>
+</ui:composition> 
